@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "esbuild src/main.ts --bundle --outfile=dist/index.js"
+    "build": "esbuild src/main.ts --bundle --outfile=dist/index.js --external:chromatic --format=esm"
   },
   "keywords": [],
   "author": "",

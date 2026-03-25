@@ -1,5 +1,6 @@
 #include "script.h"
 #include "bindings/generated_bindings/binding_qjs.h"
+#include "bindings/native_interceptor.h"
 #include "fmt/base.h"
 
 extern "C" {
@@ -11,8 +12,13 @@ std::string index_js = {(const char *)_binary_index_js_start,
                         (const char *)_binary_index_js_end};
 
 namespace chromatic::script {
-void runtime::cleanup() {}
+void runtime::cleanup() {
+  // Auto-detach all hooks when the script context is disposed
+  chromatic::js::NativeInterceptor::detachAll();
+}
 void runtime::reset() {
+  // Auto-detach all hooks before resetting the JS runtime
+  cleanup();
   context.on_bind.clear();
   context.on_bind.push_back(
       [this]() { bindAll(context.js->addModule("chromatic")); });

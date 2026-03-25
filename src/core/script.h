@@ -6,6 +6,7 @@
 namespace chromatic::script {
 struct runtime {
     breeze::script_context context;
+    ~runtime() { cleanup(); }
     void cleanup();
     void reset();
     std::expected<qjs::Value, std::string> eval_script(const std::string &script,

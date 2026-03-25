@@ -54,8 +54,396 @@ template<> struct js_bind<chromatic::js::console> {
     }
 };
 
+template <> struct qjs::js_traits<chromatic::js::NativeMemory> {
+    static chromatic::js::NativeMemory unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::NativeMemory obj;
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::NativeMemory &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::NativeMemory> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::NativeMemory>("NativeMemory")
+            .constructor<>()
+                .static_fun<&chromatic::js::NativeMemory::readMemory>("readMemory")
+                .static_fun<&chromatic::js::NativeMemory::safeReadMemory>("safeReadMemory")
+                .static_fun<&chromatic::js::NativeMemory::writeMemory>("writeMemory")
+                .static_fun<&chromatic::js::NativeMemory::allocateMemory>("allocateMemory")
+                .static_fun<&chromatic::js::NativeMemory::freeMemory>("freeMemory")
+                .static_fun<&chromatic::js::NativeMemory::protectMemory>("protectMemory")
+                .static_fun<&chromatic::js::NativeMemory::patchCode>("patchCode")
+                .static_fun<&chromatic::js::NativeMemory::flushIcache>("flushIcache")
+                .static_fun<&chromatic::js::NativeMemory::copyMemory>("copyMemory")
+                .static_fun<&chromatic::js::NativeMemory::scanMemory>("scanMemory")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::ModuleInfo> {
+    static chromatic::js::ModuleInfo unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::ModuleInfo obj;
+
+        obj.name = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "name"));
+
+        obj.base = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "base"));
+
+        obj.size = js_traits<int>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "size"));
+
+        obj.path = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "path"));
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::ModuleInfo &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        JS_SetPropertyStr(ctx, obj, "name", js_traits<std::string>::wrap(ctx, val.name));
+
+        JS_SetPropertyStr(ctx, obj, "base", js_traits<std::string>::wrap(ctx, val.base));
+
+        JS_SetPropertyStr(ctx, obj, "size", js_traits<int>::wrap(ctx, val.size));
+
+        JS_SetPropertyStr(ctx, obj, "path", js_traits<std::string>::wrap(ctx, val.path));
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::ModuleInfo> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::ModuleInfo>("ModuleInfo")
+            .constructor<>()
+                .fun<&chromatic::js::ModuleInfo::name>("name")
+                .fun<&chromatic::js::ModuleInfo::base>("base")
+                .fun<&chromatic::js::ModuleInfo::size>("size")
+                .fun<&chromatic::js::ModuleInfo::path>("path")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::RangeInfo> {
+    static chromatic::js::RangeInfo unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::RangeInfo obj;
+
+        obj.base = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "base"));
+
+        obj.size = js_traits<int>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "size"));
+
+        obj.protection = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "protection"));
+
+        obj.filePath = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "filePath"));
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::RangeInfo &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        JS_SetPropertyStr(ctx, obj, "base", js_traits<std::string>::wrap(ctx, val.base));
+
+        JS_SetPropertyStr(ctx, obj, "size", js_traits<int>::wrap(ctx, val.size));
+
+        JS_SetPropertyStr(ctx, obj, "protection", js_traits<std::string>::wrap(ctx, val.protection));
+
+        JS_SetPropertyStr(ctx, obj, "filePath", js_traits<std::string>::wrap(ctx, val.filePath));
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::RangeInfo> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::RangeInfo>("RangeInfo")
+            .constructor<>()
+                .fun<&chromatic::js::RangeInfo::base>("base")
+                .fun<&chromatic::js::RangeInfo::size>("size")
+                .fun<&chromatic::js::RangeInfo::protection>("protection")
+                .fun<&chromatic::js::RangeInfo::filePath>("filePath")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::ExportInfo> {
+    static chromatic::js::ExportInfo unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::ExportInfo obj;
+
+        obj.type = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "type"));
+
+        obj.name = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "name"));
+
+        obj.address = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "address"));
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::ExportInfo &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        JS_SetPropertyStr(ctx, obj, "type", js_traits<std::string>::wrap(ctx, val.type));
+
+        JS_SetPropertyStr(ctx, obj, "name", js_traits<std::string>::wrap(ctx, val.name));
+
+        JS_SetPropertyStr(ctx, obj, "address", js_traits<std::string>::wrap(ctx, val.address));
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::ExportInfo> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::ExportInfo>("ExportInfo")
+            .constructor<>()
+                .fun<&chromatic::js::ExportInfo::type>("type")
+                .fun<&chromatic::js::ExportInfo::name>("name")
+                .fun<&chromatic::js::ExportInfo::address>("address")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::NativeProcess> {
+    static chromatic::js::NativeProcess unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::NativeProcess obj;
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::NativeProcess &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::NativeProcess> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::NativeProcess>("NativeProcess")
+            .constructor<>()
+                .static_fun<&chromatic::js::NativeProcess::getArchitecture>("getArchitecture")
+                .static_fun<&chromatic::js::NativeProcess::getPlatform>("getPlatform")
+                .static_fun<&chromatic::js::NativeProcess::getPointerSize>("getPointerSize")
+                .static_fun<&chromatic::js::NativeProcess::getPageSize>("getPageSize")
+                .static_fun<&chromatic::js::NativeProcess::getProcessId>("getProcessId")
+                .static_fun<&chromatic::js::NativeProcess::getCurrentThreadId>("getCurrentThreadId")
+                .static_fun<&chromatic::js::NativeProcess::enumerateModules>("enumerateModules")
+                .static_fun<&chromatic::js::NativeProcess::enumerateRanges>("enumerateRanges")
+                .static_fun<&chromatic::js::NativeProcess::findExportByName>("findExportByName")
+                .static_fun<&chromatic::js::NativeProcess::findModuleByAddress>("findModuleByAddress")
+                .static_fun<&chromatic::js::NativeProcess::findModuleByName>("findModuleByName")
+                .static_fun<&chromatic::js::NativeProcess::enumerateExports>("enumerateExports")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::InstructionInfo> {
+    static chromatic::js::InstructionInfo unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::InstructionInfo obj;
+
+        obj.mnemonic = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "mnemonic"));
+
+        obj.opStr = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "opStr"));
+
+        obj.size = js_traits<int>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "size"));
+
+        obj.bytes = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "bytes"));
+
+        obj.address = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "address"));
+
+        obj.groups = js_traits<std::vector<int>>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "groups"));
+
+        obj.regsRead = js_traits<std::vector<int>>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "regsRead"));
+
+        obj.regsWrite = js_traits<std::vector<int>>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "regsWrite"));
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::InstructionInfo &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        JS_SetPropertyStr(ctx, obj, "mnemonic", js_traits<std::string>::wrap(ctx, val.mnemonic));
+
+        JS_SetPropertyStr(ctx, obj, "opStr", js_traits<std::string>::wrap(ctx, val.opStr));
+
+        JS_SetPropertyStr(ctx, obj, "size", js_traits<int>::wrap(ctx, val.size));
+
+        JS_SetPropertyStr(ctx, obj, "bytes", js_traits<std::string>::wrap(ctx, val.bytes));
+
+        JS_SetPropertyStr(ctx, obj, "address", js_traits<std::string>::wrap(ctx, val.address));
+
+        JS_SetPropertyStr(ctx, obj, "groups", js_traits<std::vector<int>>::wrap(ctx, val.groups));
+
+        JS_SetPropertyStr(ctx, obj, "regsRead", js_traits<std::vector<int>>::wrap(ctx, val.regsRead));
+
+        JS_SetPropertyStr(ctx, obj, "regsWrite", js_traits<std::vector<int>>::wrap(ctx, val.regsWrite));
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::InstructionInfo> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::InstructionInfo>("InstructionInfo")
+            .constructor<>()
+                .fun<&chromatic::js::InstructionInfo::mnemonic>("mnemonic")
+                .fun<&chromatic::js::InstructionInfo::opStr>("opStr")
+                .fun<&chromatic::js::InstructionInfo::size>("size")
+                .fun<&chromatic::js::InstructionInfo::bytes>("bytes")
+                .fun<&chromatic::js::InstructionInfo::address>("address")
+                .fun<&chromatic::js::InstructionInfo::groups>("groups")
+                .fun<&chromatic::js::InstructionInfo::regsRead>("regsRead")
+                .fun<&chromatic::js::InstructionInfo::regsWrite>("regsWrite")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::InstructionAnalysis> {
+    static chromatic::js::InstructionAnalysis unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::InstructionAnalysis obj;
+
+        obj.isBranch = js_traits<bool>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "isBranch"));
+
+        obj.isCall = js_traits<bool>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "isCall"));
+
+        obj.isRelative = js_traits<bool>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "isRelative"));
+
+        obj.target = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "target"));
+
+        obj.isPcRelative = js_traits<bool>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "isPcRelative"));
+
+        obj.size = js_traits<int>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "size"));
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::InstructionAnalysis &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        JS_SetPropertyStr(ctx, obj, "isBranch", js_traits<bool>::wrap(ctx, val.isBranch));
+
+        JS_SetPropertyStr(ctx, obj, "isCall", js_traits<bool>::wrap(ctx, val.isCall));
+
+        JS_SetPropertyStr(ctx, obj, "isRelative", js_traits<bool>::wrap(ctx, val.isRelative));
+
+        JS_SetPropertyStr(ctx, obj, "target", js_traits<std::string>::wrap(ctx, val.target));
+
+        JS_SetPropertyStr(ctx, obj, "isPcRelative", js_traits<bool>::wrap(ctx, val.isPcRelative));
+
+        JS_SetPropertyStr(ctx, obj, "size", js_traits<int>::wrap(ctx, val.size));
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::InstructionAnalysis> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::InstructionAnalysis>("InstructionAnalysis")
+            .constructor<>()
+                .fun<&chromatic::js::InstructionAnalysis::isBranch>("isBranch")
+                .fun<&chromatic::js::InstructionAnalysis::isCall>("isCall")
+                .fun<&chromatic::js::InstructionAnalysis::isRelative>("isRelative")
+                .fun<&chromatic::js::InstructionAnalysis::target>("target")
+                .fun<&chromatic::js::InstructionAnalysis::isPcRelative>("isPcRelative")
+                .fun<&chromatic::js::InstructionAnalysis::size>("size")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::NativeDisassembler> {
+    static chromatic::js::NativeDisassembler unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::NativeDisassembler obj;
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::NativeDisassembler &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::NativeDisassembler> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::NativeDisassembler>("NativeDisassembler")
+            .constructor<>()
+                .static_fun<&chromatic::js::NativeDisassembler::disassembleOne>("disassembleOne")
+                .static_fun<&chromatic::js::NativeDisassembler::disassemble>("disassemble")
+                .static_fun<&chromatic::js::NativeDisassembler::analyzeInstruction>("analyzeInstruction")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::NativeFFI> {
+    static chromatic::js::NativeFFI unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::NativeFFI obj;
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::NativeFFI &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::NativeFFI> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::NativeFFI>("NativeFFI")
+            .constructor<>()
+                .static_fun<&chromatic::js::NativeFFI::callFunction>("callFunction")
+                .static_fun<&chromatic::js::NativeFFI::createCallback>("createCallback")
+                .static_fun<&chromatic::js::NativeFFI::destroyCallback>("destroyCallback")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::NativeInterceptor> {
+    static chromatic::js::NativeInterceptor unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::NativeInterceptor obj;
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::NativeInterceptor &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::NativeInterceptor> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::NativeInterceptor>("NativeInterceptor")
+            .constructor<>()
+                .static_fun<&chromatic::js::NativeInterceptor::attach>("attach")
+                .static_fun<&chromatic::js::NativeInterceptor::detach>("detach")
+                .static_fun<&chromatic::js::NativeInterceptor::detachAll>("detachAll")
+                .static_fun<&chromatic::js::NativeInterceptor::replace>("replace")
+                .static_fun<&chromatic::js::NativeInterceptor::revert>("revert")
+            ;
+    }
+};
+
 inline void bindAll(qjs::Context::Module &mod) {
 
     js_bind<chromatic::js::console>::bind(mod);
+
+    js_bind<chromatic::js::NativeMemory>::bind(mod);
+
+    js_bind<chromatic::js::ModuleInfo>::bind(mod);
+
+    js_bind<chromatic::js::RangeInfo>::bind(mod);
+
+    js_bind<chromatic::js::ExportInfo>::bind(mod);
+
+    js_bind<chromatic::js::NativeProcess>::bind(mod);
+
+    js_bind<chromatic::js::InstructionInfo>::bind(mod);
+
+    js_bind<chromatic::js::InstructionAnalysis>::bind(mod);
+
+    js_bind<chromatic::js::NativeDisassembler>::bind(mod);
+
+    js_bind<chromatic::js::NativeFFI>::bind(mod);
+
+    js_bind<chromatic::js::NativeInterceptor>::bind(mod);
 
 }

@@ -1,0 +1,67 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            arch: arm64
+            name: macOS ARM64
+          - os: macos-13
+            arch: x64
+            name: macOS x64
+          - os: ubuntu-24.04
+            arch: x64
+            name: Linux x64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+            name: Linux ARM64
+          - os: windows-latest
+            arch: x64
+            name: Windows x64
+
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install TS dependencies
+        working-directory: src/core/typescript
+        run: pnpm install
+
+      - name: Build TypeScript
+        working-directory: src/core/typescript
+        run: pnpm build
+
+      - name: Configure xmake
+        run: xmake config -y
+
+      - name: Build
+        run: xmake build -y
+
+      - name: Test
+        run: xmake run chromatic-test

@@ -138,5 +138,297 @@ export class console {
      */
     static timeLineEnd(message: string): void
 }
+export class NativeMemory {
+	/**
+     *  Read `size` bytes from `address` (hex string), return hex-encoded data
+     * @param address: string
+     * @param size: number
+     * @returns string
+     */
+    static readMemory(address: string, size: number): string
+	/**
+     *  Like readMemory but returns empty string on access fault instead of crashing
+     * @param address: string
+     * @param size: number
+     * @returns string
+     */
+    static safeReadMemory(address: string, size: number): string
+	/**
+     *  Write hex-encoded `hexData` to `address`
+     * @param address: string
+     * @param hexData: string
+     * @returns void
+     */
+    static writeMemory(address: string, hexData: string): void
+	/**
+     *  Allocate `size` bytes of RWX memory, return address as hex string
+     * @param size: number
+     * @returns string
+     */
+    static allocateMemory(size: number): string
+	/**
+     *  Free previously allocated memory at `address` of given `size`
+     * @param address: string
+     * @param size: number
+     * @returns void
+     */
+    static freeMemory(address: string, size: number): void
+	/**
+     *  Change memory protection. `protection` is like "rwx"/"r-x"/etc.
+     *  Returns old protection string.
+     * @param address: string
+     * @param size: number
+     * @param protection: string
+     * @returns string
+     */
+    static protectMemory(address: string, size: number, protection: string): string
+	/**
+     *  Write bytes + flush instruction cache (for code patching)
+     * @param address: string
+     * @param hexBytes: string
+     * @returns void
+     */
+    static patchCode(address: string, hexBytes: string): void
+	/**
+     *  Flush instruction cache for region
+     * @param address: string
+     * @param size: number
+     * @returns void
+     */
+    static flushIcache(address: string, size: number): void
+	/**
+     *  Copy `size` bytes from `src` to `dst`
+     * @param dst: string
+     * @param src: string
+     * @param size: number
+     * @returns void
+     */
+    static copyMemory(dst: string, src: string, size: number): void
+	/**
+     *  Scan memory region for pattern (e.g. "48 8b ?? 00").
+     *  Returns JSON array of matching addresses.
+     * @param address: string
+     * @param size: number
+     * @param pattern: string
+     * @returns string
+     */
+    static scanMemory(address: string, size: number, pattern: string): string
+}
+export class ModuleInfo {
+	name: string
+	/**
+     *  hex address
+     */
+    base: string
+	size: number
+	path: string
+}
+export class RangeInfo {
+	/**
+     *  hex address
+     */
+    base: string
+	size: number
+	protection: string
+	/**
+     *  empty if none
+     */
+    filePath: string
+}
+export class ExportInfo {
+	type: string
+	name: string
+	/**
+     *  hex address
+     */
+    address: string
+}
+export class NativeProcess {
+	/**
+     *  Returns "arm64" or "x64"
+      @returns string
+     */
+    static getArchitecture(): string
+	/**
+     *  Returns "windows", "linux", "darwin", or "android"
+      @returns string
+     */
+    static getPlatform(): string
+	/**
+     *  Returns pointer size in bytes (4 or 8)
+      @returns number
+     */
+    static getPointerSize(): number
+	/**
+     *  Returns system page size
+      @returns number
+     */
+    static getPageSize(): number
+	/**
+     *  Returns current process ID
+      @returns number
+     */
+    static getProcessId(): number
+	/**
+     *  Returns current thread ID as hex string
+      @returns string
+     */
+    static getCurrentThreadId(): string
+	/**
+     *  Returns vector of loaded modules
+      @returns Array<ModuleInfo>
+     */
+    static enumerateModules(): Array<ModuleInfo>
+	/**
+     *  Returns vector of memory ranges matching protection
+     * @param protection: string
+     * @returns Array<RangeInfo>
+     */
+    static enumerateRanges(protection: string): Array<RangeInfo>
+	/**
+     *  Find export address by module and export name. Returns hex address or "0x0".
+     * @param moduleName: string
+     * @param exportName: string
+     * @returns string
+     */
+    static findExportByName(moduleName: string, exportName: string): string
+	/**
+     *  Find module containing address, or nullopt
+     * @param address: string
+     * @returns ModuleInfo | undefined
+     */
+    static findModuleByAddress(address: string): ModuleInfo | undefined
+	/**
+     *  Find module by name, or nullopt
+     * @param name: string
+     * @returns ModuleInfo | undefined
+     */
+    static findModuleByName(name: string): ModuleInfo | undefined
+	/**
+     *  Enumerate exports of a module
+     * @param moduleName: string
+     * @returns Array<ExportInfo>
+     */
+    static enumerateExports(moduleName: string): Array<ExportInfo>
+}
+export class InstructionInfo {
+	mnemonic: string
+	opStr: string
+	size: number
+	/**
+     *  hex
+     */
+    bytes: string
+	/**
+     *  hex
+     */
+    address: string
+	groups: Array<number>
+	regsRead: Array<number>
+	regsWrite: Array<number>
+}
+export class InstructionAnalysis {
+	isBranch: boolean
+	isCall: boolean
+	isRelative: boolean
+	/**
+     *  hex
+     */
+    target: string
+	isPcRelative: boolean
+	size: number
+}
+export class NativeDisassembler {
+	/**
+     *  Disassemble one instruction at address.
+     * @param address: string
+     * @returns InstructionInfo
+     */
+    static disassembleOne(address: string): InstructionInfo
+	/**
+     *  Disassemble `count` instructions starting at address.
+     * @param address: string
+     * @param count: number
+     * @returns Array<InstructionInfo>
+     */
+    static disassemble(address: string, count: number): Array<InstructionInfo>
+	/**
+     *  Analyze instruction for control flow.
+     * @param address: string
+     * @returns InstructionAnalysis
+     */
+    static analyzeInstruction(address: string): InstructionAnalysis
+}
+export class NativeFFI {
+	/**
+     *  Call a native function at `address`.
+     *  retType: "void","int","uint","long","ulong","int8","uint8",...,"float","double","pointer"
+     *  argTypes: vector of type strings
+     *  args: vector of argument values (numbers or hex strings for pointers)
+     *  abi: "default","sysv","stdcall","win64"
+     *  Returns: result as string (number or hex address)
+     * @param address: string
+     * @param retType: string
+     * @param argTypes: Array<string>
+     * @param args: Array<string>
+     * @param abi: string
+     * @returns string
+     */
+    static callFunction(address: string, retType: string, argTypes: Array<string>, args: Array<string>, abi: string): string
+	/**
+     *  Create a native callback closure.
+     *  handler: JS function that receives args as vector of strings, returns result string
+     *  Returns: address of the native closure as hex string
+     * @param handler: ((arg1: Array<string>) => string)
+     * @param retType: string
+     * @param argTypes: Array<string>
+     * @param abi: string
+     * @returns string
+     */
+    static createCallback(handler: ((arg1: Array<string>) => string), retType: string, argTypes: Array<string>, abi: string): string
+	/**
+     *  Destroy a previously created callback closure
+     * @param address: string
+     * @returns void
+     */
+    static destroyCallback(address: string): void
+}
+export class NativeInterceptor {
+	/**
+     *  Attach an inline hook to `target`.
+     *  onEnter/onLeave receive the cpuContext pointer as a hex string.
+     *  Returns a hookId string used for detaching.
+     * @param target: string
+     * @param onEnter: ((arg1: string) => void)
+     * @param onLeave: ((arg1: string) => void)
+     * @returns string
+     */
+    static attach(target: string, onEnter: ((arg1: string) => void), onLeave: ((arg1: string) => void)): string
+	/**
+     *  Detach a hook by hookId.
+     * @param hookId: string
+     * @returns void
+     */
+    static detach(hookId: string): void
+	/**
+     *  Detach all active hooks.
+      @returns void
+     */
+    static detachAll(): void
+	/**
+     *  Replace target function with replacement.
+     *  Returns trampoline address (hex) to call the original function.
+     * @param target: string
+     * @param replacement: string
+     * @returns string
+     */
+    static replace(target: string, replacement: string): string
+	/**
+     *  Revert a replacement.
+     * @param target: string
+     * @returns void
+     */
+    static revert(target: string): void
+}
 }
 

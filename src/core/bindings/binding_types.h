@@ -4,3 +4,8 @@
 // STL can be included
 #pragma once
 #include "console.h"
+#include "native_memory.h"
+#include "native_process.h"
+#include "native_disassembler.h"
+#include "native_ffi.h"
+#include "native_interceptor.h"
