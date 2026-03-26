@@ -1,6 +1,11 @@
 // test_memory.cc — Memory alloc/read/write/copy/protect/scan tests
 #include "test_common.h"
 
+// Create a string for xref tests to work
+static const std::string kXrefString = "__CHROMATIC_TEST_XREF__";
+// And avoid it being optimized out
+[[maybe_unused]] static const std::string& kXrefStringRef __attribute__((used)) = kXrefString;
+
 TEST_F(ChromaticTest, Memory_AllocReadWriteU32) {
   EXPECT_TRUE(jsEval(R"(
     (() => {
@@ -102,13 +107,12 @@ TEST_F(ChromaticTest, Memory_ScanWildcard) {
 TEST_F(ChromaticTest, Memory_ScanModule) {
   EXPECT_TRUE(jsEval(R"(
     (() => {
-      // Just verify it doesn't throw — actual content depends on the module
       const mods = Process.enumerateModules();
       if (mods.length === 0) throw new Error('no modules');
-      // Scan for a common byte (0x00) in the first module — should find at least one
-      const results = Memory.scanModule(mods[0].name, '00 00 00 00');
-      // We just check it returns an array (may or may not have matches)
+      const results = Memory.scanModule(mods.find(v=>v.name.includes('chromatic')).name , /* __CHROMATIC_TEST_XREF__ */ '5F 5F 43 48 52 4F 4D 41 54 49 43 5F 54 45 53 54 5F 58 52 45 46 5F 5F');
       if (!Array.isArray(results)) throw new Error('not array');
+      if (results.length === 0) throw new Error('no matches');
+      if (results[0].address.isNull()) throw new Error('null address');
     })()
   )"));
 }
