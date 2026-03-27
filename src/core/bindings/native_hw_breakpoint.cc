@@ -403,23 +403,30 @@ hwBpSigtrapHandler(std::shared_ptr<chromatic::js::ExceptionContext> ctx) {
   // For data watchpoints, we need to check DR6 to find which slot triggered
 #if defined(CHROMATIC_DARWIN) && defined(CHROMATIC_X64)
   if (ctx->$platformContext) {
-    auto *uctx = static_cast<ucontext_t *>(ctx->$platformContext);
-    uint64_t dr6 = uctx->uc_mcontext->__ss.__dr6;
+    // On macOS, debug registers are not in ucontext - need to read via Mach API
+    thread_t thread = pthread_mach_thread_np(pthread_self());
+    x86_debug_state64_t dbg{};
+    mach_msg_type_number_t count = x86_DEBUG_STATE64_COUNT;
+    kern_return_t kr = thread_get_state(thread, x86_DEBUG_STATE64,
+                                        reinterpret_cast<thread_state_t>(&dbg), &count);
+    if (kr == KERN_SUCCESS) {
+      uint64_t dr6 = dbg.__dr6;
 
-    // Check each slot (DR0-DR3)
-    for (int slot = 0; slot < 4; slot++) {
-      if (dr6 & (1ULL << slot)) {
-        // This slot triggered - find the entry
-        for (auto &[addr, entry] : g_hwByAddress) {
-          if (entry->slot == slot) {
-            if (entry->onHit) {
-              std::string ctxHex = toHexAddr(ctx->pc);
-              try {
-                entry->onHit(ctxHex);
-              } catch (...) {
+      // Check each slot (DR0-DR3)
+      for (int slot = 0; slot < 4; slot++) {
+        if (dr6 & (1ULL << slot)) {
+          // This slot triggered - find the entry
+          for (auto &[addr, entry] : g_hwByAddress) {
+            if (entry->slot == slot) {
+              if (entry->onHit) {
+                std::string ctxHex = toHexAddr(ctx->pc);
+                try {
+                  entry->onHit(ctxHex);
+                } catch (...) {
+                }
               }
+              return chromatic::js::HandleAction::Handled;
             }
-            return chromatic::js::HandleAction::Handled;
           }
         }
       }
