@@ -37,7 +37,7 @@ jobs:
       - name: Install xmake
         uses: xmake-io/github-action-setup-xmake@v1
         with:
-          xmake-version: 3.0.6
+          xmake-version: 3.0.7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -58,7 +58,7 @@ jobs:
         run: pnpm build
 
       - name: Configure xmake
-        run: xmake config -y
+        run: xmake f -m releasedbg -v -y
 
       - name: Build
         run: xmake build -y
