@@ -5,7 +5,7 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive  # 确保拉取子模块
+          submodules: recursive
 
       - name: Install xmake
         uses: xmake-io/github-action-setup-xmake@v1
@@ -81,8 +81,14 @@ jobs:
         run: |
           xmake f -m releasedbg -v -y --toolchain=clang
       
-      - name: Configure xmake (Others)
-        if: runner.os != 'Linux'
+      - name: Configure xmake (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          xmake f -m releasedbg -v -y
+
+      - name: Configure xmake (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
           xmake f -m releasedbg -v -y
 
@@ -102,11 +108,12 @@ jobs:
 
       - name: List build artifacts (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
           echo "=== Build directory structure ==="
-          dir /s /b build\*chromatic* 2>nul
+          Get-ChildItem -Path build -Recurse -Filter "*chromatic*" -ErrorAction SilentlyContinue | Select-Object FullName
           echo "=== All build files ==="
-          dir /s /b build 2>nul
+          Get-ChildItem -Path build -Recurse -ErrorAction SilentlyContinue | Select-Object -First 20 FullName
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
