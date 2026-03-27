@@ -498,6 +498,193 @@ template<> struct js_bind<chromatic::js::NativeInterceptor> {
     }
 };
 
+template <> struct qjs::js_traits<chromatic::js::ExceptionContext> {
+    static chromatic::js::ExceptionContext unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::ExceptionContext obj;
+
+        obj.type = js_traits<chromatic::js::ExceptionType>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "type"));
+
+        obj.faultAddress = js_traits<uint64_t>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "faultAddress"));
+
+        obj.pc = js_traits<uint64_t>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "pc"));
+
+        obj.accessType = js_traits<chromatic::js::AccessType>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "accessType"));
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::ExceptionContext &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        JS_SetPropertyStr(ctx, obj, "type", js_traits<chromatic::js::ExceptionType>::wrap(ctx, val.type));
+
+        JS_SetPropertyStr(ctx, obj, "faultAddress", js_traits<uint64_t>::wrap(ctx, val.faultAddress));
+
+        JS_SetPropertyStr(ctx, obj, "pc", js_traits<uint64_t>::wrap(ctx, val.pc));
+
+        JS_SetPropertyStr(ctx, obj, "accessType", js_traits<chromatic::js::AccessType>::wrap(ctx, val.accessType));
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::ExceptionContext> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::ExceptionContext>("ExceptionContext")
+            .constructor<>()
+                .fun<&chromatic::js::ExceptionContext::getPc>("getPc")
+                .fun<&chromatic::js::ExceptionContext::setPc>("setPc")
+                .fun<&chromatic::js::ExceptionContext::setSingleStep>("setSingleStep")
+                .fun<&chromatic::js::ExceptionContext::type>("type")
+                .fun<&chromatic::js::ExceptionContext::faultAddress>("faultAddress")
+                .fun<&chromatic::js::ExceptionContext::pc>("pc")
+                .fun<&chromatic::js::ExceptionContext::accessType>("accessType")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::NativeExceptionHandler> {
+    static chromatic::js::NativeExceptionHandler unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::NativeExceptionHandler obj;
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::NativeExceptionHandler &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::NativeExceptionHandler> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::NativeExceptionHandler>("NativeExceptionHandler")
+            .constructor<>()
+                .static_fun<&chromatic::js::NativeExceptionHandler::enable>("enable")
+                .static_fun<&chromatic::js::NativeExceptionHandler::disable>("disable")
+                .static_fun<&chromatic::js::NativeExceptionHandler::isEnabled>("isEnabled")
+                .static_fun<&chromatic::js::NativeExceptionHandler::addCallback>("addCallback")
+                .static_fun<&chromatic::js::NativeExceptionHandler::removeCallback>("removeCallback")
+                .static_fun<&chromatic::js::NativeExceptionHandler::removeAllCallbacks>("removeAllCallbacks")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::NativeSoftwareBreakpoint> {
+    static chromatic::js::NativeSoftwareBreakpoint unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::NativeSoftwareBreakpoint obj;
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::NativeSoftwareBreakpoint &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::NativeSoftwareBreakpoint> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::NativeSoftwareBreakpoint>("NativeSoftwareBreakpoint")
+            .constructor<>()
+                .static_fun<&chromatic::js::NativeSoftwareBreakpoint::set>("set")
+                .static_fun<&chromatic::js::NativeSoftwareBreakpoint::remove>("remove")
+                .static_fun<&chromatic::js::NativeSoftwareBreakpoint::removeAll>("removeAll")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::NativeHardwareBreakpoint> {
+    static chromatic::js::NativeHardwareBreakpoint unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::NativeHardwareBreakpoint obj;
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::NativeHardwareBreakpoint &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::NativeHardwareBreakpoint> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::NativeHardwareBreakpoint>("NativeHardwareBreakpoint")
+            .constructor<>()
+                .static_fun<&chromatic::js::NativeHardwareBreakpoint::set>("set")
+                .static_fun<&chromatic::js::NativeHardwareBreakpoint::remove>("remove")
+                .static_fun<&chromatic::js::NativeHardwareBreakpoint::removeAll>("removeAll")
+                .static_fun<&chromatic::js::NativeHardwareBreakpoint::maxBreakpoints>("maxBreakpoints")
+                .static_fun<&chromatic::js::NativeHardwareBreakpoint::activeCount>("activeCount")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::MemoryAccessDetails> {
+    static chromatic::js::MemoryAccessDetails unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::MemoryAccessDetails obj;
+
+        obj.address = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "address"));
+
+        obj.pageBase = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "pageBase"));
+
+        obj.operation = js_traits<std::string>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "operation"));
+
+        obj.rangeIndex = js_traits<int>::unwrap(ctx, JS_GetPropertyStr(ctx, v, "rangeIndex"));
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::MemoryAccessDetails &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        JS_SetPropertyStr(ctx, obj, "address", js_traits<std::string>::wrap(ctx, val.address));
+
+        JS_SetPropertyStr(ctx, obj, "pageBase", js_traits<std::string>::wrap(ctx, val.pageBase));
+
+        JS_SetPropertyStr(ctx, obj, "operation", js_traits<std::string>::wrap(ctx, val.operation));
+
+        JS_SetPropertyStr(ctx, obj, "rangeIndex", js_traits<int>::wrap(ctx, val.rangeIndex));
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::MemoryAccessDetails> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::MemoryAccessDetails>("MemoryAccessDetails")
+            .constructor<>()
+                .fun<&chromatic::js::MemoryAccessDetails::address>("address")
+                .fun<&chromatic::js::MemoryAccessDetails::pageBase>("pageBase")
+                .fun<&chromatic::js::MemoryAccessDetails::operation>("operation")
+                .fun<&chromatic::js::MemoryAccessDetails::rangeIndex>("rangeIndex")
+            ;
+    }
+};
+
+template <> struct qjs::js_traits<chromatic::js::NativeMemoryAccessMonitor> {
+    static chromatic::js::NativeMemoryAccessMonitor unwrap(JSContext *ctx, JSValueConst v) {
+        chromatic::js::NativeMemoryAccessMonitor obj;
+
+        return obj;
+    }
+
+    static JSValue wrap(JSContext *ctx, const chromatic::js::NativeMemoryAccessMonitor &val) noexcept {
+        JSValue obj = JS_NewObject(ctx);
+
+        return obj;
+    }
+};
+template<> struct js_bind<chromatic::js::NativeMemoryAccessMonitor> {
+    static void bind(qjs::Context::Module &mod) {
+        mod.class_<chromatic::js::NativeMemoryAccessMonitor>("NativeMemoryAccessMonitor")
+            .constructor<>()
+                .static_fun<&chromatic::js::NativeMemoryAccessMonitor::enable>("enable")
+                .static_fun<&chromatic::js::NativeMemoryAccessMonitor::disable>("disable")
+                .static_fun<&chromatic::js::NativeMemoryAccessMonitor::disableAll>("disableAll")
+                .static_fun<&chromatic::js::NativeMemoryAccessMonitor::drainPending>("drainPending")
+            ;
+    }
+};
+
 inline void bindAll(qjs::Context::Module &mod) {
 
     js_bind<chromatic::js::console>::bind(mod);
@@ -525,5 +712,17 @@ inline void bindAll(qjs::Context::Module &mod) {
     js_bind<chromatic::js::NativeFFI>::bind(mod);
 
     js_bind<chromatic::js::NativeInterceptor>::bind(mod);
+
+    js_bind<chromatic::js::ExceptionContext>::bind(mod);
+
+    js_bind<chromatic::js::NativeExceptionHandler>::bind(mod);
+
+    js_bind<chromatic::js::NativeSoftwareBreakpoint>::bind(mod);
+
+    js_bind<chromatic::js::NativeHardwareBreakpoint>::bind(mod);
+
+    js_bind<chromatic::js::MemoryAccessDetails>::bind(mod);
+
+    js_bind<chromatic::js::NativeMemoryAccessMonitor>::bind(mod);
 
 }

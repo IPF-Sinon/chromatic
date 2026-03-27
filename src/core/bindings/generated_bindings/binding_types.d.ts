@@ -528,5 +528,186 @@ export class NativeInterceptor {
      */
     static revert(target: string): void
 }
+export class ExceptionContext {
+	type: ExceptionType
+	/**
+     *  Address that faulted (or PC for breakpoints)
+     */
+    faultAddress: number
+	/**
+     *  Program counter at exception
+     */
+    pc: number
+	/**
+     *  For SIGSEGV: read/write/execute
+     */
+    accessType: AccessType
+	/**
+     *  Get the program counter from the platform context.
+      @returns number
+     */
+    getPc(): number
+	/**
+     *  Set the program counter in the platform context (for resumption).
+     * @param newPc: number
+     * @returns void
+     */
+    setPc(newPc: number): void
+	/**
+     *  Enable/disable single-step mode (TF on x86, SS bit on ARM64).
+     * @param enable: boolean
+     * @returns void
+     */
+    setSingleStep(enable: boolean): void
+}
+export class NativeExceptionHandler {
+	/**
+     *  Enable the global exception handler (opt-in, idempotent).
+      @returns void
+     */
+    static enable(): void
+	/**
+     *  Disable the global exception handler. Restores original handlers.
+      @returns void
+     */
+    static disable(): void
+	/**
+     *  Returns true if currently enabled.
+      @returns boolean
+     */
+    static isEnabled(): boolean
+	/**
+     *  Register a JS callback for a given exception type.
+     *  type: "access_violation"|"breakpoint"|"single_step"|"bus_error"|"illegal_instruction"
+     *  The callback receives (exceptionType: string, faultAddress: hex string).
+     *  Returns callbackId (hex) for removal.
+     * @param type: string
+     * @param callback: ((arg1: string, arg2: string) => void)
+     * @returns string
+     */
+    static addCallback(type: string, callback: ((arg1: string, arg2: string) => void)): string
+	/**
+     *  Remove a previously registered callback.
+     * @param callbackId: string
+     * @returns void
+     */
+    static removeCallback(callbackId: string): void
+	/**
+     *  Remove all registered callbacks.
+      @returns void
+     */
+    static removeAllCallbacks(): void
+}
+export class NativeSoftwareBreakpoint {
+	/**
+     *  Set a software breakpoint at address (hex).
+     *  Writes INT3 (x86) or BRK #1 (ARM64).
+     *  onHit receives cpuContext pointer (hex) when triggered.
+     *  Returns breakpointId (hex).
+     * @param address: string
+     * @param onHit: ((arg1: string) => void)
+     * @returns string
+     */
+    static set(address: string, onHit: ((arg1: string) => void)): string
+	/**
+     *  Remove a breakpoint by ID. Restores original byte(s).
+     * @param breakpointId: string
+     * @returns void
+     */
+    static remove(breakpointId: string): void
+	/**
+     *  Remove all software breakpoints.
+      @returns void
+     */
+    static removeAll(): void
+}
+export class NativeHardwareBreakpoint {
+	/**
+     *  Set a hardware breakpoint/watchpoint.
+     *  address: hex target address
+     *  type: "execute" | "write" | "readwrite"
+     *  size: 1, 2, 4, or 8 bytes (for watchpoints; ignored for execute)
+     *  onHit: callback receiving cpuContext pointer (hex)
+     *  Returns breakpointId (hex).
+     * @param address: string
+     * @param type: string
+     * @param size: number
+     * @param onHit: ((arg1: string) => void)
+     * @returns string
+     */
+    static set(address: string, type: string, size: number, onHit: ((arg1: string) => void)): string
+	/**
+     *  Remove a breakpoint by ID.
+     * @param breakpointId: string
+     * @returns void
+     */
+    static remove(breakpointId: string): void
+	/**
+     *  Remove all hardware breakpoints.
+      @returns void
+     */
+    static removeAll(): void
+	/**
+     *  Max hardware breakpoints the platform supports.
+      @returns number
+     */
+    static maxBreakpoints(): number
+	/**
+     *  Currently active count.
+      @returns number
+     */
+    static activeCount(): number
+}
+export class MemoryAccessDetails {
+	/**
+     *  hex — exact access address
+     */
+    address: string
+	/**
+     *  hex — page-aligned base
+     */
+    pageBase: string
+	/**
+     *  "read" | "write" | "execute"
+     */
+    operation: string
+	/**
+     *  which watched range triggered
+     */
+    rangeIndex: number
+}
+export class NativeMemoryAccessMonitor {
+	/**
+     *  Enable monitoring on memory ranges (one-shot per range).
+     *  Removes permissions via mprotect, catches SIGSEGV on first access.
+     *  When a watched range is accessed, permissions are permanently restored
+     *  and the access is recorded.
+     *  onAccess fires with (address, pageBase, operation, rangeIndex).
+     *  Returns monitorId (hex).
+     * @param addresses: Array<string>
+     * @param sizes: Array<number>
+     * @param onAccess: ((arg1: string, arg2: string, arg3: string, arg4: number) => void)
+     * @returns string
+     */
+    static enable(addresses: Array<string>, sizes: Array<number>, onAccess: ((arg1: string, arg2: string, arg3: string, arg4: number) => void)): string
+	/**
+     *  Disable monitoring for a specific monitor.
+     * @param monitorId: string
+     * @returns void
+     */
+    static disable(monitorId: string): void
+	/**
+     *  Disable all active monitors.
+      @returns void
+     */
+    static disableAll(): void
+	/**
+     *  Drain pending access events, calling the registered callbacks.
+     *  Returns the number of events drained.
+     *  This is called from JS context (safe for JS callbacks).
+      @returns number
+     */
+    static drainPending(): number
+}
 }
 

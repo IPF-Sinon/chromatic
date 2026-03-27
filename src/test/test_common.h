@@ -36,6 +36,12 @@ inline std::string ptrHex(void *p) {
   return buf;
 }
 
+// ── Signal test skip mechanism ──
+extern bool shouldSkipSignalTests();
+#define SKIP_SIGNAL()                                                          \
+  if (shouldSkipSignalTests())                                                 \
+  GTEST_SKIP() << "Signal tests disabled"
+
 // ── C functions for hooking/calling from JS ──
 
 extern "C" int chromatic_test_add(int a, int b);

@@ -9,3 +9,7 @@
 #include "native_disassembler.h"
 #include "native_ffi.h"
 #include "native_interceptor.h"
+#include "native_exception_handler.h"
+#include "native_breakpoint.h"
+#include "native_hw_breakpoint.h"
+#include "native_memory_access_monitor.h"

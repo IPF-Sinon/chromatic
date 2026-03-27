@@ -12,6 +12,9 @@ import { NativeFunction } from './native-function';
 import { NativeCallback } from './native-callback';
 import { hexdump } from './hexdump';
 import { Interceptor } from './interceptor/index';
+import { ExceptionHandler } from './exception-handler';
+import { SoftwareBreakpoint, HardwareBreakpoint } from './breakpoint';
+import { MemoryAccessMonitor } from './memory-access-monitor';
 
 // Register globals (Frida-compatible)
 const g = globalThis as any;
@@ -29,6 +32,10 @@ g.Process = Process;
 g.Module = Module;
 g.Instruction = Instruction;
 g.Interceptor = Interceptor;
+g.ExceptionHandler = ExceptionHandler;
+g.SoftwareBreakpoint = SoftwareBreakpoint;
+g.HardwareBreakpoint = HardwareBreakpoint;
+g.MemoryAccessMonitor = MemoryAccessMonitor;
 
 // Utility functions
 g.ptr = ptr;

@@ -1,6 +1,10 @@
 #include "script.h"
 #include "bindings/generated_bindings/binding_qjs.h"
+#include "bindings/native_breakpoint.h"
+#include "bindings/native_exception_handler.h"
+#include "bindings/native_hw_breakpoint.h"
 #include "bindings/native_interceptor.h"
+#include "bindings/native_memory_access_monitor.h"
 #include "fmt/base.h"
 
 extern "C" {
@@ -13,11 +17,16 @@ std::string index_js = {(const char *)_binary_index_js_start,
 
 namespace chromatic::script {
 void runtime::cleanup() {
-  // Auto-detach all hooks when the script context is disposed
+  // Auto-cleanup all subsystems when the script context is disposed
+  chromatic::js::NativeMemoryAccessMonitor::disableAll();
+  chromatic::js::NativeHardwareBreakpoint::removeAll();
+  chromatic::js::NativeSoftwareBreakpoint::removeAll();
   chromatic::js::NativeInterceptor::detachAll();
+  chromatic::js::NativeExceptionHandler::removeAllCallbacks();
+  chromatic::js::NativeExceptionHandler::disable();
 }
 void runtime::reset() {
-  // Auto-detach all hooks before resetting the JS runtime
+  // Auto-cleanup before resetting the JS runtime
   cleanup();
   context.on_bind.clear();
   context.on_bind.push_back(
