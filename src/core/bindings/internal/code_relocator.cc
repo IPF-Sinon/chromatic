@@ -325,12 +325,21 @@ void *buildTrampoline(DispatchFn onEnterFn, DispatchFn onLeaveFn,
   a.push(x86::r14);
   a.push(x86::r15);
 
-  // System V ABI: rdi = arg0 (cpuContext), rsi = arg1 (userData)
+  // Function entry preserves the caller's stack layout because we arrive via
+  // an inline jump / exception resume instead of a real call.
+#ifdef CHROMATIC_WINDOWS
+  // Microsoft x64 ABI: rcx = arg0, rdx = arg1, plus 32-byte shadow space.
+  a.mov(x86::rcx, x86::rsp);
+  a.mov(x86::rdx, reinterpret_cast<uint64_t>(userData));
+  // Entry RSP is 8-byte misaligned relative to a normal call frame, so
+  // reserve shadow space plus an extra 8 bytes to restore 16-byte alignment.
+  a.sub(x86::rsp, 0x28);
+#else
+  // System V ABI: rdi = arg0, rsi = arg1.
   a.mov(x86::rdi, x86::rsp);
   a.mov(x86::rsi, reinterpret_cast<uint64_t>(userData));
-
-  // Align stack to 16 bytes (16 pushes + pushfq = 17*8 = 136 = 0x88, +8)
   a.sub(x86::rsp, 0x8);
+#endif
 
   // Call onEnter dispatch
   a.mov(x86::rax, reinterpret_cast<uint64_t>(onEnterFn));
@@ -338,15 +347,25 @@ void *buildTrampoline(DispatchFn onEnterFn, DispatchFn onLeaveFn,
 
   // Call onLeave dispatch (if provided)
   if (onLeaveFn) {
+#ifdef CHROMATIC_WINDOWS
+    a.mov(x86::rcx, x86::rsp);
+    a.add(x86::rcx, 0x28); // point back to the saved register snapshot
+    a.mov(x86::rdx, reinterpret_cast<uint64_t>(userData));
+#else
     a.mov(x86::rdi, x86::rsp);
     a.add(x86::rdi, 0x8); // point back to saved regs
     a.mov(x86::rsi, reinterpret_cast<uint64_t>(userData));
+#endif
     a.mov(x86::rax, reinterpret_cast<uint64_t>(onLeaveFn));
     a.call(x86::rax);
   }
 
-  // Undo alignment
+  // Undo ABI-specific stack reservation.
+#ifdef CHROMATIC_WINDOWS
+  a.add(x86::rsp, 0x28);
+#else
   a.add(x86::rsp, 0x8);
+#endif
 
   // Restore all registers
   a.pop(x86::r15);

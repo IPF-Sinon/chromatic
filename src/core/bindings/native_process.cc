@@ -349,13 +349,28 @@ std::vector<RangeInfo> NativeProcess::enumerateRanges(const std::string &protect
 std::string NativeProcess::findExportByName(const std::string &moduleName,
                                             const std::string &exportName) {
 #ifdef CHROMATIC_WINDOWS
-  HMODULE hMod = GetModuleHandleA(moduleName.empty() ? nullptr : moduleName.c_str());
+  if (moduleName.empty()) {
+    HMODULE hMods[1024];
+    DWORD cbNeeded = 0;
+    HANDLE hProcess = GetCurrentProcess();
+
+    if (!EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded))
+      return "0x0";
+
+    const auto count = static_cast<size_t>(cbNeeded / sizeof(HMODULE));
+    for (size_t i = 0; i < count; i++) {
+      if (FARPROC proc = GetProcAddress(hMods[i], exportName.c_str()))
+        return toHexAddr(reinterpret_cast<uint64_t>(proc));
+    }
+    return "0x0";
+  }
+
+  HMODULE hMod = GetModuleHandleA(moduleName.c_str());
   if (!hMod)
     return "0x0";
-  FARPROC proc = GetProcAddress(hMod, exportName.c_str());
-  if (!proc)
-    return "0x0";
-  return toHexAddr(reinterpret_cast<uint64_t>(proc));
+  if (FARPROC proc = GetProcAddress(hMod, exportName.c_str()))
+    return toHexAddr(reinterpret_cast<uint64_t>(proc));
+  return "0x0";
 #else
   void *handle = nullptr;
   if (moduleName.empty()) {

@@ -165,6 +165,8 @@ namespace chromatic::js {
 
 InstructionInfo NativeDisassembler::disassembleOne(const std::string &address) {
   uint64_t addr = parseHexAddr(address);
+  if (addr == 0)
+    return InstructionInfo{"", "", 0, "", "0x0", {}, {}, {}};
   auto code = reinterpret_cast<const uint8_t *>(addr);
 
   cs_insn *insn;
@@ -180,6 +182,8 @@ InstructionInfo NativeDisassembler::disassembleOne(const std::string &address) {
 std::vector<InstructionInfo>
 NativeDisassembler::disassemble(const std::string &address, int count) {
   uint64_t addr = parseHexAddr(address);
+  if (addr == 0 || count <= 0)
+    return {};
   auto code = reinterpret_cast<const uint8_t *>(addr);
 
   cs_insn *insn;
@@ -200,6 +204,8 @@ NativeDisassembler::disassemble(const std::string &address, int count) {
 InstructionAnalysis
 NativeDisassembler::analyzeInstruction(const std::string &address) {
   uint64_t addr = parseHexAddr(address);
+  if (addr == 0)
+    return InstructionAnalysis{false, false, false, "0x0", false, 0};
   auto code = reinterpret_cast<const uint8_t *>(addr);
 
   cs_insn *insn;
@@ -263,6 +269,8 @@ NativeDisassembler::findXrefs(const std::string &rangeStart, int rangeSize,
   std::vector<XrefResult> results;
   uint64_t start = parseHexAddr(rangeStart);
   uint64_t target = parseHexAddr(targetAddr);
+  if (start == 0 || target == 0 || rangeSize <= 0)
+    return results;
   auto code = reinterpret_cast<const uint8_t *>(start);
   size_t remaining = static_cast<size_t>(rangeSize);
   size_t offset = 0;
@@ -330,6 +338,8 @@ NativeDisassembler::filterInstructions(
     const std::string &address, int count,
     std::function<bool(InstructionInfo)> filter) {
   uint64_t addr = parseHexAddr(address);
+  if (addr == 0 || count <= 0)
+    return {};
   auto code = reinterpret_cast<const uint8_t *>(addr);
 
   std::vector<InstructionInfo> results;
