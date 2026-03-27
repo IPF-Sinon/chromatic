@@ -5,6 +5,7 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:  # 允许手动触发
 
 jobs:
   build:
@@ -15,24 +16,36 @@ jobs:
           - os: macos-latest
             arch: arm64
             name: macOS ARM64
+            artifact-name: chromatic-macos-arm64
+            lib-ext: dylib
           - os: macos-15-intel
             arch: x64
             name: macOS x64
+            artifact-name: chromatic-macos-x64
+            lib-ext: dylib
           - os: ubuntu-24.04
             arch: x64
             name: Linux x64
+            artifact-name: chromatic-linux-x64
+            lib-ext: so
           - os: ubuntu-24.04-arm
             arch: arm64
             name: Linux ARM64
+            artifact-name: chromatic-linux-arm64
+            lib-ext: so
           - os: windows-latest
             arch: x64
             name: Windows x64
+            artifact-name: chromatic-windows-x64
+            lib-ext: dll
 
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.name }}
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive  # 确保拉取子模块
 
       - name: Install xmake
         uses: xmake-io/github-action-setup-xmake@v1
@@ -63,18 +76,53 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang
 
-      - name: Configure xmake
+      - name: Configure xmake (Linux)
         if: runner.os == 'Linux'
         run: |
           xmake f -m releasedbg -v -y --toolchain=clang
       
-      - name: Configure xmake
+      - name: Configure xmake (Others)
         if: runner.os != 'Linux'
         run: |
           xmake f -m releasedbg -v -y
 
       - name: Build
-        run: xmake build -y
+        run: xmake build -v -y
 
       - name: Test
         run: xmake run chromatic-test
+
+      - name: List build artifacts (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          echo "=== Build directory structure ==="
+          find build -type f -name "*chromatic*" 2>/dev/null || echo "No artifacts found"
+          echo "=== All build files ==="
+          find build -type f 2>/dev/null | head -20
+
+      - name: List build artifacts (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          echo "=== Build directory structure ==="
+          dir /s /b build\*chromatic* 2>nul
+          echo "=== All build files ==="
+          dir /s /b build 2>nul
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: |
+            build/**/*chromatic*
+            build/**/*.${{ matrix.lib-ext }}
+            src/core/typescript/dist/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload full build directory (debug)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}-full-build
+          path: build/
+          retention-days: 7
