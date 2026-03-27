@@ -57,8 +57,21 @@ jobs:
         working-directory: src/core/typescript
         run: pnpm build
 
+      - name: Install Clang (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
+
       - name: Configure xmake
-        run: xmake f -m releasedbg -v -y
+        if: runner.os == 'Linux'
+        run: |
+          xmake f -m releasedbg -v -y --toolchain=clang
+      
+      - name: Configure xmake
+        if: runner.os != 'Linux'
+        run: |
+          xmake f -m releasedbg -v -y
 
       - name: Build
         run: xmake build -y
